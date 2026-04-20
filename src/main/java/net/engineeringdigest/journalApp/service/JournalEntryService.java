@@ -2,6 +2,7 @@ package net.engineeringdigest.journalApp.service;
 
 import lombok.extern.slf4j.Slf4j;
 import net.engineeringdigest.journalApp.entity.JournalEntry;
+import net.engineeringdigest.journalApp.entity.User;
 import net.engineeringdigest.journalApp.repository.JournalEntryRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,17 @@ public class JournalEntryService {
     @Autowired
     private JournalEntryRepository journalEntryRepository;
 
-    public void saveEntry(JournalEntry journalEntry) {
+    @Autowired
+    private UserService userService;
+
+    public void saveEntry(JournalEntry journalEntry, String userName) {
         try{
             journalEntry.setDate(LocalDateTime.now());
+            //Saving the journalEntry into the journal_entries collection of journaldb Database
             journalEntryRepository.save(journalEntry);
+
+            //Saving the journalEntry id into the journalEntries List field of users collection of journaldb Database
+            User user = userService.findByUsername(userName);
         }catch(Exception e){
             log.error("Exception ", e);
         }

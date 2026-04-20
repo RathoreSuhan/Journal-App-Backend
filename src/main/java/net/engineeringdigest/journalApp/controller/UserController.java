@@ -24,11 +24,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody User user){
-        if (userService.existsByUsername(user.getUsername())) {
-            return new ResponseEntity<>("Username already exists", HttpStatus.CONFLICT);
-        }
         try {
-            user.setId(null); // Prevent accidental overwrite when client sends an existing id
             userService.saveEntry(user);
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (DuplicateKeyException e) {
@@ -36,9 +32,9 @@ public class UserController {
         }
     }
 
-    @PutMapping
-    public ResponseEntity<?> updateUser(@RequestBody User user){
-        User userInDb = userService.findByUsername(user.getUsername());
+    @PutMapping("/{userName}")
+    public ResponseEntity<?> updateUser(@RequestBody User user, @PathVariable String userName){
+        User userInDb = userService.findByUsername(userName);
         if(userInDb != null){
             userInDb.setUsername(user.getUsername());
             userInDb.setPassword(user.getPassword());
