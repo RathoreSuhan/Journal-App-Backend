@@ -26,13 +26,21 @@ public class JournalEntryService {
         try{
             journalEntry.setDate(LocalDateTime.now());
             //Saving the journalEntry into the journal_entries collection of journaldb Database
-            journalEntryRepository.save(journalEntry);
+            JournalEntry s = journalEntryRepository.save(journalEntry);
 
             //Saving the journalEntry id into the journalEntries List field of users collection of journaldb Database
             User user = userService.findByUsername(userName);
+            user.getJournalEntries().add(s);
+
+            //if user is already present in the users collection than user data will be updated
+            userService.saveEntry(user);
         }catch(Exception e){
             log.error("Exception ", e);
         }
+        journalEntryRepository.save(journalEntry);
+    }
+
+    public void saveEntry(JournalEntry journalEntry) {
         journalEntryRepository.save(journalEntry);
     }
 
@@ -44,7 +52,13 @@ public class JournalEntryService {
         return journalEntryRepository.findById(id);
     }
 
-    public void deleteById(ObjectId id) {
+    public void deleteById(ObjectId id, String userName) {
+        User user = userService.findByUsername(userName);
+        user.getJournalEntries().removeIf(j -> j.getId().equals(id));
+
+        //if user is already present in the users collection than user data will be updated
+        userService.saveEntry(user);
+
         journalEntryRepository.deleteById(id);
     }
 }
